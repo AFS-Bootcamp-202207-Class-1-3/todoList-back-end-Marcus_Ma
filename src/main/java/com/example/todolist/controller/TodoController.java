@@ -1,7 +1,10 @@
 package com.example.todolist.controller;
 
+import com.example.todolist.dto.TodoRequest;
 import com.example.todolist.entity.Todo;
+import com.example.todolist.mapper.TodoMapper;
 import com.example.todolist.service.TodoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +16,8 @@ import java.util.List;
 public class TodoController {
     private final TodoService todoService;
 
+    @Autowired
+    TodoMapper todoMapper;
     public TodoController(TodoService todoService) {
         this.todoService = todoService;
     }
@@ -23,12 +28,19 @@ public class TodoController {
     }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Todo addTodo(@RequestBody Todo newTodo){
-        return todoService.add(newTodo);
+    public Todo addTodo(@RequestBody TodoRequest newTodo){
+        Todo todo = todoMapper.toEntity(newTodo);
+        return todoService.add(todo);
     }
 
     @PutMapping("/{id}")
-    public Todo changeTodoDone(@PathVariable Integer id,@RequestBody Todo newTodo){
-        return todoService.changeTodoDone(id,newTodo);
+    public Todo changeTodo(@PathVariable Integer id,@RequestBody TodoRequest newTodo){
+        Todo todo = todoMapper.toEntity(newTodo);
+        System.out.println(todo.getContext());
+        if(todo.getContext()!=null){
+            return todoService.changeTodoContext(id,todo);
+        }else{
+            return todoService.changeTodoDone(id,todo);
+        }
     }
 }

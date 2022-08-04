@@ -28,4 +28,11 @@ public class TodoService {
         todo.setDone(newTodo.getDone());
         return jpaTodoRepository.save(todo);
     }
+
+    public Todo changeTodoContext(Integer id, Todo newTodo) {
+        Todo todo = jpaTodoRepository.findById(id)
+                .orElseThrow(()-> new NotFoundException(Todo.class.getSimpleName()));
+        todo.setContext(newTodo.getContext());
+        return jpaTodoRepository.save(todo);
+    }
 }
