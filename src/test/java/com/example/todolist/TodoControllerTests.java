@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -25,7 +26,7 @@ import static org.hamcrest.Matchers.hasSize;
 
 @AutoConfigureMockMvc
 @SpringBootTest
-//@ActiveProfiles("test")
+@ActiveProfiles("test")
 class TodoControllerTests {
     @Resource
     MockMvc client;
@@ -109,5 +110,15 @@ class TodoControllerTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.context").value("test6"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.done").value(false));
     }
-
+    @Test
+    void should_noContent_when_deleteTodoById_given_id() throws Exception {
+        // given
+        Todo oldTodo = todoRepository.save(new Todo(1,"test7",false));
+        // when then
+        client.perform(MockMvcRequestBuilders.delete("/todos/{id}",oldTodo.getId()))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+        // should
+        List<Todo> allTodos = todoRepository.findAll();
+        assertThat(allTodos, hasSize(0));
+    }
 }
