@@ -35,4 +35,8 @@ public class TodoService {
         todo.setContext(newTodo.getContext());
         return jpaTodoRepository.save(todo);
     }
+
+    public void deleteTodoById(Integer id) {
+        jpaTodoRepository.deleteById(id);
+    }
 }

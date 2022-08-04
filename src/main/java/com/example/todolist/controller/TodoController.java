@@ -36,11 +36,15 @@ public class TodoController {
     @PutMapping("/{id}")
     public Todo changeTodo(@PathVariable Integer id,@RequestBody TodoRequest newTodo){
         Todo todo = todoMapper.toEntity(newTodo);
-        System.out.println(todo.getContext());
         if(todo.getContext()!=null){
             return todoService.changeTodoContext(id,todo);
         }else{
             return todoService.changeTodoDone(id,todo);
         }
+    }
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTodoById(@PathVariable Integer id){
+        todoService.deleteTodoById(id);
     }
 }
