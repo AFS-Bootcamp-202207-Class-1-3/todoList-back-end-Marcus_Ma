@@ -91,4 +91,23 @@ class TodoControllerTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.context").value("test4"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.done").value(true));
     }
+    @Test
+    void should_return_rightTodo_when_updateTodoContext_given_context() throws Exception {
+        // given
+        Todo todo =new Todo(1,"test5",false);
+        Todo oldTodo = todoRepository.save(todo);
+        TodoRequest todoRequest = new TodoRequest();
+        todoRequest.setContext("test6");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(todoRequest);
+        // when then
+        client.perform(MockMvcRequestBuilders.put("/todos/{id}",oldTodo.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(oldTodo.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.context").value("test6"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.done").value(false));
+    }
+
 }
