@@ -16,4 +16,8 @@ public class TodoService {
     public List<Todo> finAll(){
         return jpaTodoRepository.findAll();
     }
+
+    public Todo add(Todo newTodo) {
+        return jpaTodoRepository.save(newTodo);
+    }
 }
