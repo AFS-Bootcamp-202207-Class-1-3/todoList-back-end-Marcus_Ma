@@ -17,12 +17,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.annotation.Resource;
-
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -34,16 +34,17 @@ class TodoControllerTests {
     JpaTodoRepository todoRepository;
     @Autowired
     TodoMapper todoMapper;
+
     @BeforeEach
-    public void cleanAll(){
+    public void cleanAll() {
         todoRepository.deleteAll();
     }
 
     @Test
     void should_return_allToDoList_when_getAllTodo_given_none() throws Exception {
         // given
-        Todo todo1 = new Todo(1,"test1",false);
-        Todo todo2 = new Todo(2,"test2",false);
+        Todo todo1 = new Todo(1, "test1", false);
+        Todo todo2 = new Todo(2, "test2", false);
         todoRepository.save(todo1);
         todoRepository.save(todo2);
         // when then
@@ -54,6 +55,7 @@ class TodoControllerTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].context").value("test1"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].done").value(false));
     }
+
     @Test
     void should_return_Todo_when_addNewTodo_given_NewTodo() throws Exception {
         // given
@@ -63,8 +65,8 @@ class TodoControllerTests {
         String requestJson = objectMapper.writeValueAsString(todoRequest);
         // when then
         client.perform(MockMvcRequestBuilders.post("/todos")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.context").value("test3"))
@@ -74,17 +76,18 @@ class TodoControllerTests {
         assertThat(allTodos, hasSize(1));
         assertThat(allTodos.get(0).getContext(), equalTo("test3"));
     }
+
     @Test
     void should_return_rightTodo_when_updateTodoDone_given_Done() throws Exception {
         // given
-        Todo todo =new Todo(1,"test4",false);
+        Todo todo = new Todo(1, "test4", false);
         Todo oldTodo = todoRepository.save(todo);
         TodoRequest todoRequest = new TodoRequest();
         todoRequest.setDone(true);
         ObjectMapper objectMapper = new ObjectMapper();
         String requestJson = objectMapper.writeValueAsString(todoRequest);
         // when then
-        client.perform(MockMvcRequestBuilders.put("/todos/{id}",oldTodo.getId())
+        client.perform(MockMvcRequestBuilders.put("/todos/{id}", oldTodo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -92,17 +95,18 @@ class TodoControllerTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.context").value("test4"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.done").value(true));
     }
+
     @Test
     void should_return_rightTodo_when_updateTodoContext_given_context() throws Exception {
         // given
-        Todo todo =new Todo(1,"test5",false);
+        Todo todo = new Todo(1, "test5", false);
         Todo oldTodo = todoRepository.save(todo);
         TodoRequest todoRequest = new TodoRequest();
         todoRequest.setContext("test6");
         ObjectMapper objectMapper = new ObjectMapper();
         String requestJson = objectMapper.writeValueAsString(todoRequest);
         // when then
-        client.perform(MockMvcRequestBuilders.put("/todos/{id}",oldTodo.getId())
+        client.perform(MockMvcRequestBuilders.put("/todos/{id}", oldTodo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -110,15 +114,31 @@ class TodoControllerTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.context").value("test6"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.done").value(false));
     }
+
     @Test
     void should_noContent_when_deleteTodoById_given_id() throws Exception {
         // given
-        Todo oldTodo = todoRepository.save(new Todo(1,"test7",false));
+        Todo oldTodo = todoRepository.save(new Todo(1, "test7", false));
         // when then
-        client.perform(MockMvcRequestBuilders.delete("/todos/{id}",oldTodo.getId()))
+        client.perform(MockMvcRequestBuilders.delete("/todos/{id}", oldTodo.getId()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
         // should
         List<Todo> allTodos = todoRepository.findAll();
         assertThat(allTodos, hasSize(0));
+    }
+
+    @Test
+    void should_return_todoNotFound_when_putNotFoundId() throws Exception {
+        // given
+        TodoRequest todoRequest = new TodoRequest();
+        todoRequest.setContext("test6");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(todoRequest);
+        // when then
+        client.perform(MockMvcRequestBuilders.put("/todos/{id}", 0)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(result -> assertEquals("Todo not found", result.getResolvedException().getMessage()));
     }
 }

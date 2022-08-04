@@ -34,7 +34,7 @@ public class TodoController {
     }
 
     @PutMapping("/{id}")
-    public Todo changeTodo(@PathVariable Integer id,@RequestBody TodoRequest newTodo){
+    public Todo updateTodo(@PathVariable Integer id,@RequestBody TodoRequest newTodo){
         Todo todo = todoMapper.toEntity(newTodo);
         if(todo.getContext()!=null){
             return todoService.changeTodoContext(id,todo);
