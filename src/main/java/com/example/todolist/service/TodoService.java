@@ -1,6 +1,7 @@
 package com.example.todolist.service;
 
 import com.example.todolist.entity.Todo;
+import com.example.todolist.exception.NotFoundException;
 import com.example.todolist.repository.JpaTodoRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,5 +20,12 @@ public class TodoService {
 
     public Todo add(Todo newTodo) {
         return jpaTodoRepository.save(newTodo);
+    }
+
+    public Todo changeTodoDone(Integer id, Todo newTodo) {
+        Todo todo = jpaTodoRepository.findById(id)
+                .orElseThrow(()-> new NotFoundException(Todo.class.getSimpleName()));
+        todo.setDone(newTodo.getDone());
+        return jpaTodoRepository.save(todo);
     }
 }
